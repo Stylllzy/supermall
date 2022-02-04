@@ -1,5 +1,16 @@
+let path = require('path')
+function resolve (dir) {
+  return path.join(__dirname, dir)
+}
 module.exports = {
-    configWebpack: {
+  chainWebpack: config => {
+    config.resolve.alias
+      .set('@', resolve('src'))
+  }
+}
+
+module.exports = {
+    configureWebpack: {
         resolve: {
             alias: {
                 'assets': '@/assets',
