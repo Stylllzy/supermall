@@ -1,5 +1,5 @@
 module.exports = {
-    configurWebpack: {
+    configWebpack: {
         resolve: {
             alias: {
                 'assets': '@/assets',
