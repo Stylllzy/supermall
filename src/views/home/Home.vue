@@ -44,6 +44,7 @@ import Scroll from "@/components/common/scroll/Scroll";
 import BackTop from "@/components/content/backTop/BackTop";
 
 import {getHomeMultidata,getHomeGoods} from "@/network/home";
+import {debounce} from "@/common/utils";
 
 export default {
   name: "Home",
@@ -86,7 +87,7 @@ export default {
   },
   mounted() {
     // 监听item中图片加载完成
-    const refresh = this.debounce(this.$refs.scroll.refresh,200)
+    const refresh = debounce(this.$refs.scroll.refresh,200)
     this.$bus.$on('itemImageLoad',() => {
       // this.$refs.scroll.refresh()
       refresh()
@@ -112,16 +113,6 @@ export default {
     /**
      * 事件监听相关方法
      */
-    // 防抖函数，减少 refresh 请求次数
-    debounce(func,delay) {
-      let timer = null
-      return function (...args) {
-        if(timer) clearTimeout(timer)
-        timer = setTimeout(() => {
-          func.apply(this,args)
-        },delay)
-      }
-    },
     tabClick(index) {
       switch (index) {
         case 0:
