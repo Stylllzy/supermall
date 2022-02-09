@@ -14,7 +14,7 @@ export const backTopMixin = {
 }
 
 export const tabControlMixin = {
-  data: function () {
+  data() {
     return {
       currentType: POP
     }

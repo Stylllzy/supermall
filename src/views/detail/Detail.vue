@@ -1,7 +1,12 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detail-nav-bar" @titleClick="titleClick"/>
-    <scroll class="content" ref="scroll" @scroll="contentScroll">
+    <detail-nav-bar class="detail-nav-bar"
+                    @titleClick="titleClick"
+                    ref="nav"/>
+    <scroll class="content"
+            ref="scroll"
+            :probe-type="3"
+            @scroll="contentScroll">
       <detail-swiper :top-images="topImages"/>
       <detail-base-info :goods="goods"/>
       <detail-shop-info :shop="shop"/>
@@ -11,8 +16,9 @@
       <detail-recommend-info ref="recommend" :recommend-list="recommends"/>
 <!--      <goods-list :goods="recommends"/>-->
     </scroll>
-
+    <detail-bottom-bar @addToCart="addToCart" />
     <back-top @click.native="backClick" v-show="isShowBackTop"/>
+    <toast :msg="msg" :show="show"/>
   </div>
 </template>
 
@@ -26,7 +32,9 @@ import DetailParamInfo from "@/views/detail/childComponents/DetailParamInfo";
 import DetailCommentInfo from "@/views/detail/childComponents/DetailCommentInfo";
 import GoodsList from "@/components/content/goods/GoodsList";
 import DetailRecommendInfo from "@/views/detail/childComponents/DetailRecommendInfo";
+import DetailBottomBar from "@/views/detail/childComponents/DetailBottomBar";
 import BackTop from "@/components/content/backTop/BackTop";
+import Toast from "@/components/common/toast/Toast";
 
 import Scroll from "@/components/common/scroll/Scroll";
 
@@ -45,7 +53,9 @@ export default {
     DetailCommentInfo,
     DetailRecommendInfo,
     GoodsList,
+    DetailBottomBar,
     BackTop,
+    Toast,
     Scroll
   },
   data() {
@@ -60,7 +70,10 @@ export default {
       recommends: [],
       themeTopYs: [],
       isShowBackTop: false,
-      getThemeTopY: null
+      getThemeTopY: null,
+      currentIndex: 0,
+      msg: '',
+      show: false
     }
   },
   mounted() {
@@ -121,8 +134,20 @@ export default {
   },
   methods: {
     contentScroll(position) {
+      const positionY = -position.y
       // 判断 backtop 是否显示
-      this.isShowBackTop = (-position.y) > 1500
+      this.isShowBackTop = positionY > 1500
+
+      // positionY 和主题中值进行对比
+      let length = this.themeTopYs.length
+      for(let i = 0;i < length;i++) {
+        if(this.currentIndex !== i && ((i < length - 1 && positionY > this.themeTopYs[i] && positionY
+          < this.themeTopYs[i+1] || (i === length - 1 && positionY > this.themeTopYs[i])))){
+          this.currentIndex = i
+          // console.log(this.currentIndex);
+          this.$refs.nav.currentIndex = this.currentIndex
+        }
+      }
     },
     backClick() {
       this.$refs.scroll.scroll.scrollTo(0,0,500)
@@ -135,7 +160,33 @@ export default {
     titleClick(index) {
       // console.log(index);
       this.$refs.scroll.scrollTo(0,-this.themeTopYs[index],200)
-    }
+    },
+    addToCart() {
+      // 获取
+      const product = {}
+      product.image = this.topImages[0]
+      product.title = this.goods.title
+      product.desc = this.goods.desc
+      product.price = this.goods.nowPrice
+      product.iid = this.iid
+
+      // 添加到购物车
+      // this.$store.cartList.push(product)
+      // this.$store.commit('addCart',product)
+      this.$store.dispatch('addCart',product).then(res => {
+        // this.show = true
+        // this.msg = res
+        // console.log(res);
+        // setTimeout(() => {
+        //   this.show = false
+        //   this.msg = ''
+        // },2000)
+
+        this.$toast.show(res,1500)
+      })
+
+    },
+
   }
 }
 </script>
